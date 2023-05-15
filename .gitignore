@@ -1,0 +1,12 @@
+# Listing files
+*.lst
+
+# Object files
+*.prg
+
+# Build number files
+*.build
+
+# Output hex files
+*.intel
+

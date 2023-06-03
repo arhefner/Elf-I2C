@@ -7,6 +7,6 @@
 # Build number files
 *.build
 
-# Output hex files
+# Output files
 *.intel
-
+*.elfos

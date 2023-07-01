@@ -1,6 +1,6 @@
-I2C_CLEAR   EQU     $4227
-I2C_RDBUF   EQU     $405c
-I2C_RDREG   EQU     $4100
-I2C_READ_BYTE EQU     $4201
-I2C_WRBUF   EQU     $4000
-I2C_WRITE_BYTE EQU     $41bf
+            extrn   i2c_wrbuf
+            extrn   i2c_rdbuf
+            extrn   i2c_rdreg
+            extrn   i2c_write_byte
+            extrn   i2c_read_byte
+            extrn   i2c_clear

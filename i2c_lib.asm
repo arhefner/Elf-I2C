@@ -40,6 +40,8 @@
 ;Register usage:
 ;   R9.1 maintains the current state of the output port
 ;
+.link       .align  page
+
             proc    i2c_wrbuf
 
             ghi     ra
@@ -81,13 +83,16 @@
             #include i2c_start.asm
 
             sep     ra              ; write address + write flag
+            bdf     wr_stop         ; report error if no device ack
 next_byte:  lda     rd              ; get next byte
             phi     rf
             sep     ra              ; write data byte
+            bdf     wr_stop         ; error if device does not ack
             dec     rf
             glo     rf
             bnz     next_byte
 
+wr_stop:
             #include i2c_stop.asm
 
           #if I2C_GROUP
@@ -185,6 +190,7 @@ next_byte:  lda     rd              ; get next byte
             #include i2c_start.asm
 
             sep     ra              ; write address + read flag
+            bdf     rd_stop
 
             glo     rf
             bz      rd_last
@@ -230,6 +236,9 @@ rd_last:    sep     rb              ; read final byte
             dec     r2
             phi     r9
 
+            clc
+
+rd_stop:
             #include i2c_stop.asm
 
           #if I2C_GROUP
@@ -330,9 +339,11 @@ rd_last:    sep     rb              ; read final byte
             #include i2c_start.asm
 
             sep     ra              ; write address + write flag
+            bdf     rdr_stop
 wloop:      lda     r6              ; get next byte
             phi     rf
             sep     ra              ; write next byte
+            bdf     rdr_stop
             dec     rf
             glo     rf
             bnz     wloop
@@ -402,6 +413,9 @@ rdr_last:   sep     rb              ; read final byte
             dec     r2
             phi     r9
 
+            clc
+
+rdr_stop:
             #include i2c_stop.asm
 
           #if I2C_GROUP
@@ -435,6 +449,8 @@ rdr_last:   sep     rb              ; read final byte
             rtn
 
             endp
+
+.link       .align  page
 
 ;------------------------------------------------------------------------
 ;This routine writes one byte of data (MSB first) on the i2c bus.
@@ -483,13 +499,12 @@ wr_one:     ani     SDA_HIGH        ; SDA high
             ani     SCL_HIGH        ; SCL high
             str     r2
             out     I2C_PORT
+            dec     r2
+stretch:    b4      stretch
+            clc 
             b3      wr_ack
-.nak:       dec     r2
-            phi     r9
-            skp
-wr_ack:     dec     r2
-            ghi     r9
-            ori     SCL_LOW         ; SCL low
+nak:        stc
+wr_ack:     ori     SCL_LOW         ; SCL low
             str     r2
             out     I2C_PORT
             dec     r2
@@ -499,15 +514,13 @@ wr_ack:     dec     r2
 
             endp
 
-.link       .align  page
-
 ;------------------------------------------------------------------------
-;this routine reads one byte of data (msb first) from the i2c bus.
+;This routine reads one byte of data (msb first) from the i2c bus.
 ;
-;register usage:
-;   r2   points to an available memory location (typically top of stack)
-;   r9.0 bit counter
-;   rb.0 on output, contains the value read from to the bus
+;Register usage:
+;   R2   points to an available memory location (typically top of stack)
+;   R9.0 bit counter
+;   RB.0 on output, contains the value read from to the bus
 ;
             proc    i2c_read_byte
 

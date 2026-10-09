@@ -207,6 +207,8 @@ done:       sex     r3
 
             sex     r2
 
+            call    led7_clear
+
             ldi     0
             rtn
 

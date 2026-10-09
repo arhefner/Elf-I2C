@@ -95,4 +95,7 @@
   #define FREQ_KHZ     4000             ; default processor clock frequency
   #define I2C_GROUP    1                ; I2C port group
   #define I2C_PORT     3                ; parallel port for bit-bang I2C
+  #define PIO1_GROUP   1
+  #define PIO1_OUTA    2
+  #define PIO1_OUTB    3
 #endif
